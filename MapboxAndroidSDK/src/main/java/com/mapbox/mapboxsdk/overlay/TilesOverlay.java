@@ -42,7 +42,7 @@ public class TilesOverlay extends SafeDrawOverlay {
 
     /* to avoid allocations during draw */
     protected static SafePaint mDebugPaint = null;
-    protected static SafePaint mLoadingTilePaint = null;
+    protected SafePaint mLoadingTilePaint = null;
     protected static Bitmap mLoadingTileBitmap = null;
     protected Paint mLoadingPaint = null;
     private final Rect mTileRect = new Rect();
@@ -283,29 +283,31 @@ public class TilesOverlay extends SafeDrawOverlay {
      * Draw a 'loading' placeholder with a canvas.
      */
     private SafePaint getLoadingTilePaint() {
-        if (mLoadingTilePaint == null && mLoadingBackgroundColor != Color.TRANSPARENT) {
-            try {
-                final int tileSize =
-                        mTileProvider.getTileSource() != null ? mTileProvider.getTileSource()
-                                .getTileSizePixels() : 256;
-                mLoadingTileBitmap =
-                        Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.ARGB_8888);
-                final Canvas canvas = new Canvas(mLoadingTileBitmap);
-                canvas.drawColor(mLoadingBackgroundColor);
-                final int lineSize = tileSize / 16;
-                for (int a = 0; a < tileSize; a += lineSize) {
-                    canvas.drawLine(0, a, tileSize, a, mLoadingPaint);
-                    canvas.drawLine(a, 0, a, tileSize, mLoadingPaint);
+        if (mLoadingTilePaint == null) {
+            if (mLoadingBackgroundColor != Color.TRANSPARENT) {
+                try {
+                    final int tileSize =
+                            mTileProvider.getTileSource() != null ? mTileProvider.getTileSource()
+                                    .getTileSizePixels() : 256;
+                    mLoadingTileBitmap =
+                            Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.ARGB_8888);
+                    final Canvas canvas = new Canvas(mLoadingTileBitmap);
+                    canvas.drawColor(mLoadingBackgroundColor);
+                    final int lineSize = tileSize / 16;
+                    for (int a = 0; a < tileSize; a += lineSize) {
+                        canvas.drawLine(0, a, tileSize, a, mLoadingPaint);
+                        canvas.drawLine(a, 0, a, tileSize, mLoadingPaint);
+                    }
+                    mLoadingTilePaint = new SafePaint();
+                    mLoadingTilePaint.setShader(new BitmapShader(mLoadingTileBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
+                } catch (final OutOfMemoryError e) {
+                    Log.e(TAG, "OutOfMemoryError getting loading tile");
+                    System.gc();
                 }
+            } else {
                 mLoadingTilePaint = new SafePaint();
-                mLoadingTilePaint.setShader(new BitmapShader(mLoadingTileBitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
-            } catch (final OutOfMemoryError e) {
-                Log.e(TAG, "OutOfMemoryError getting loading tile");
-                System.gc();
+                mLoadingTilePaint.setColor(mLoadingBackgroundColor);
             }
-        } else {
-            mLoadingTilePaint = new SafePaint();
-            mLoadingTilePaint.setColor(mLoadingBackgroundColor);
         }
         return mLoadingTilePaint;
     }
