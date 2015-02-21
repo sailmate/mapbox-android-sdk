@@ -19,7 +19,10 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.overlay.Icon;
 import com.mapbox.mapboxsdk.overlay.Marker;
 import com.mapbox.mapboxsdk.overlay.PathOverlay;
+import com.mapbox.mapboxsdk.overlay.TilesOverlay;
 import com.mapbox.mapboxsdk.overlay.UserLocationOverlay;
+import com.mapbox.mapboxsdk.tileprovider.MapTileLayerBase;
+import com.mapbox.mapboxsdk.tileprovider.MapTileLayerBasic;
 import com.mapbox.mapboxsdk.tileprovider.tilesource.ITileLayer;
 import com.mapbox.mapboxsdk.tileprovider.tilesource.MBTilesLayer;
 import com.mapbox.mapboxsdk.tileprovider.tilesource.MapboxTileLayer;
@@ -54,7 +57,14 @@ public class MainTestFragment extends Fragment {
                 "http://mapserver.sailmate.fi/mobile/images/{z}/{x}/{y}.png").setName("sailmate")
                 .setMinimumZoomLevel(1)
                 .setMaximumZoomLevel(16);
-        mv.setTileSource(source);
+
+        mv.setTileSource(source[1]);
+
+        MapTileLayerBase mapTileLayerBase = new MapTileLayerBasic(mv.getContext(), source[0], mv);
+        TilesOverlay overlay = new TilesOverlay(mapTileLayerBase);
+        overlay.setLoadingBackgroundColor(Color.TRANSPARENT);
+        mv.getOverlays().add(overlay);
+
         final BoundingBox box = source[0].getBoundingBox();
         mv.setScrollableAreaLimit(box);
         mv.setMinZoomLevel(mv.getTileProvider().getMinimumZoomLevel());

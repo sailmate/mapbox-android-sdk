@@ -303,6 +303,9 @@ public class TilesOverlay extends SafeDrawOverlay {
                 Log.e(TAG, "OutOfMemoryError getting loading tile");
                 System.gc();
             }
+        } else {
+            mLoadingTilePaint = new SafePaint();
+            mLoadingTilePaint.setColor(mLoadingBackgroundColor);
         }
         return mLoadingTilePaint;
     }
